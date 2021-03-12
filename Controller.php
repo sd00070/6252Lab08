@@ -8,6 +8,7 @@ class Controller
 
     public function __construct()
     {
+        $this->ensureSecureConnection();
         $this->startSession();
         $this->connectToDatabase();
         $this->action = $this->getAction();
@@ -124,13 +125,18 @@ class Controller
     private function getAction()
     {
         $action = filter_input(INPUT_POST, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        if ($action === NULL) {
-            $action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            if ($action === NULL) {
-                $action = '';
-            }
+
+        if ($action !== NULL) {
+            return $action;
         }
-        return $action;
+
+        $action = filter_input(INPUT_GET, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+
+        if ($action !== NULL) {
+            return $action;
+        }
+
+        return '';
     }
 
     /****************************************************************
@@ -139,6 +145,19 @@ class Controller
     private function startSession()
     {
         session_start();
+    }
+
+    private function ensureSecureConnection()
+    {
+        $https = filter_input(INPUT_SERVER, 'HTTPS');
+
+        if (!$https) {
+            $host = filter_input(INPUT_SERVER, 'HTTP_HOST');
+            $uri = filter_input(INPUT_SERVER, 'REQUEST_URI');
+            $url = 'https:' . $host . $uri;
+            header("Location: $url");
+            exit();
+        }
     }
 
     /****************************************************************
