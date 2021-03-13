@@ -84,6 +84,12 @@ class Controller
     *----------------------------------------*/
     private function processShowRegistration()
     {
+        if (isset($_SESSION['is_valid_user'])) {
+            $error_message = 'Please log out to register a new user.';
+            include('./view/application_error.php');
+            return;
+        }
+
         $username = '';
         $password = '';
         $registration_message = '';
@@ -98,12 +104,12 @@ class Controller
         $fields = $this->validator->getFields();
         $registration_message = '';
 
-        
+
         $fields = $this->validator->getFields();
         $this->validator->checkUsername('username', $username);
-        
+
         $this->validator->checkPassword('password', $password);
-        
+
         $isValid = true;
 
         if ($this->validator->foundErrors()) {
@@ -114,7 +120,7 @@ class Controller
             $isValid = false;
             $registration_message = 'Account with that username has already been created';
         }
-        
+
         if (!$isValid) {
             include './view/register.php';
             return;
