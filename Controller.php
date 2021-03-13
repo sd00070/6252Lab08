@@ -78,7 +78,10 @@ class Controller
             include('./view/login.php');
         }
     }
-
+    
+    /*----------------------------------------*
+    * Start User Registration
+    *----------------------------------------*/
     private function processShowRegistration()
     {
         $username = '';
@@ -86,7 +89,7 @@ class Controller
         $fields = $this->validator->getFields();
         include './view/register.php';
     }
-
+    
     private function processRegister()
     {
         $username = filter_input(INPUT_POST, 'username');
@@ -94,7 +97,7 @@ class Controller
         
         $this->validator->checkUsername('username', $username);
         $this->validator->checkPassword('password', $password);
-
+        
         $fields = $this->validator->getFields();
         
         if ($this->validator->foundErrors()) {
@@ -102,14 +105,23 @@ class Controller
             return;
         }
 
-        include './view/register.php';
-    }
+        $password = password_hash($password, PASSWORD_BCRYPT);
 
+        $this->db->registerUser($username, $password);
+        
+        $_SESSION['is_valid_user'] = true;
+        $_SESSION['username'] = $username;
+        header("Location: .?action=Show Tasks");
+    }
+    /*----------------------------------------*
+    * End User Registration
+    *----------------------------------------*/
+    
     private function processShowHomePage()
     {
         include './view/home.php';
     }
-
+    
     private function processLogout()
     {
         $_SESSION = array();   // Clear all session data from memory
@@ -155,7 +167,6 @@ class Controller
         $tasks = $this->db->getTasksForUser($_SESSION['username']);
         include './view/task_list.php';
     }
-
 
     /****************************************************************
      * Get action from $_GET or $_POST array
