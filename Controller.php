@@ -1,6 +1,8 @@
 <?php
 require_once './model/Database.php';
 
+require_once './model/Validator.php';
+
 class Controller
 {
     private $action;
@@ -12,6 +14,10 @@ class Controller
         $this->startSession();
         $this->connectToDatabase();
         $this->action = $this->getAction();
+
+        $this->validator = new Validator();
+        $this->validator->addField('username', 'Must be 1-20 characters');
+        $this->validator->addField('password', '8 character minimum & contains numbers, lowercase & uppercase letters');
     }
 
     public function invoke()
@@ -22,6 +28,12 @@ class Controller
                 break;
             case 'Login':
                 $this->processLogin();
+                break;
+            case 'Show Registration':
+                $this->processShowRegistration();
+                break;
+            case 'Register':
+                $this->processRegister();
                 break;
             case 'Logout':
                 $this->processLogout();
@@ -65,6 +77,32 @@ class Controller
             $login_message = 'Invalid username or password';
             include('./view/login.php');
         }
+    }
+
+    private function processShowRegistration()
+    {
+        $username = '';
+        $password = '';
+        $fields = $this->validator->getFields();
+        include './view/register.php';
+    }
+
+    private function processRegister()
+    {
+        $username = filter_input(INPUT_POST, 'username');
+        $password = filter_input(INPUT_POST, 'password');
+        
+        $this->validator->checkUsername('username', $username);
+        $this->validator->checkPassword('password', $password);
+
+        $fields = $this->validator->getFields();
+        
+        if ($this->validator->foundErrors()) {
+            include './view/register.php';
+            return;
+        }
+
+        include './view/register.php';
     }
 
     private function processShowHomePage()

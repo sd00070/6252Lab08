@@ -91,3 +91,12 @@ label {
 br {
     clear: left;
 }
+
+.error {
+    color: red;
+}
+
+.info {
+    color: darkcyan;
+    font-size: 0.9rem;
+}
