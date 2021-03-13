@@ -95,4 +95,16 @@ class Database
         $statement->execute();
         $statement->closeCursor();
     }
+
+    public function containsUsername($username)
+    {
+        $query = 'SELECT 1 FROM users WHERE username = :username';
+        $statement = $this->db->prepare($query);
+        $statement->bindValue(':username', $username);
+        $statement->execute();
+        $result = $statement->fetch();
+        $statement->closeCursor();
+
+        return $result >= 1;
+    }
 }

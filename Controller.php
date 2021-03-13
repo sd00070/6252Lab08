@@ -78,7 +78,7 @@ class Controller
             include('./view/login.php');
         }
     }
-    
+
     /*----------------------------------------*
     * Start User Registration
     *----------------------------------------*/
@@ -86,21 +86,36 @@ class Controller
     {
         $username = '';
         $password = '';
+        $registration_message = '';
         $fields = $this->validator->getFields();
         include './view/register.php';
     }
-    
+
     private function processRegister()
     {
         $username = filter_input(INPUT_POST, 'username');
         $password = filter_input(INPUT_POST, 'password');
-        
-        $this->validator->checkUsername('username', $username);
-        $this->validator->checkPassword('password', $password);
+        $fields = $this->validator->getFields();
+        $registration_message = '';
+
         
         $fields = $this->validator->getFields();
+        $this->validator->checkUsername('username', $username);
         
+        $this->validator->checkPassword('password', $password);
+        
+        $isValid = true;
+
         if ($this->validator->foundErrors()) {
+            $isValid = false;
+        }
+
+        if ($this->db->containsUsername($username)) {
+            $isValid = false;
+            $registration_message = 'Account with that username has already been created';
+        }
+        
+        if (!$isValid) {
             include './view/register.php';
             return;
         }
@@ -108,7 +123,7 @@ class Controller
         $password = password_hash($password, PASSWORD_BCRYPT);
 
         $this->db->registerUser($username, $password);
-        
+
         $_SESSION['is_valid_user'] = true;
         $_SESSION['username'] = $username;
         header("Location: .?action=Show Tasks");
@@ -116,12 +131,12 @@ class Controller
     /*----------------------------------------*
     * End User Registration
     *----------------------------------------*/
-    
+
     private function processShowHomePage()
     {
         include './view/home.php';
     }
-    
+
     private function processLogout()
     {
         $_SESSION = array();   // Clear all session data from memory

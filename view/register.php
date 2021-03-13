@@ -19,6 +19,8 @@ include './view/shared/nav.php';
 
         <label>&nbsp;</label>
         <input type="submit" name="action" value="Register">
+
+        <p><?= $registration_message; ?></p>
     </form>
 </main>
 </body>
